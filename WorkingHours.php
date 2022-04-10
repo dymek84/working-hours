@@ -1,140 +1,102 @@
 <?php
-$exceptionsa = array("2022-04-02 07:30:55", "2022-03-29 07:30:00",);
-$hollidays = array("2022-04-01",);
-print_r(newCalculation('22-04-03 07:30:00', '22-04-08 14:30:00', $exceptionsa, $hollidays)) . "\r\n";
-
-
-function checkDateAndChangeToTimestamp($date)
-{
-    if (!is_int($date)) {
-        $date = strtotime($date);
-    }
-    return $date;
-}
-function newCalculation($startDateAndTime, $stopDateAndTime, $exceptions, $HollidayArray)
+require "Cdate.php";
+function newCalculation($startDateAndTime, $stopDateAndTime, $exceptions, $HollidayArray, $FinishTime)
 {
     $iDateFrom = strtotime($startDateAndTime);
     $iDateTo = strtotime($stopDateAndTime);
     $double_array = array();
-
-
-    if ($iDateTo >= $iDateFrom) {
-        array_push($double_array, date('Y-m-d H:i:s', $iDateFrom)); // first entry
-
-
-        while ($iDateFrom < $iDateTo) {
-            $iDateFrom += 86400; // add 24 hours
-            if (date('Y-m-d', $iDateFrom) == date('Y-m-d', $iDateTo)) {
-                array_push($double_array, date('Y-m-d H:i:s', $iDateTo));
-            } elseif ($iDateFrom < $iDateTo) {
-                array_push($double_array, date('Y-m-d', $iDateFrom));
-            }
-        }
-    }
-
-    return $double_array;
-}
-function createDateRangeArray($startDateAndTime, $stopDateAndTime, $exceptions, $HollidayArray)
-{
-    // takes two dates formatted as YYYY-MM-DD and creates an
-    // inclusive array of the dates between the from and to dates.
-    // arraySize 1=sameday 2=nextday 2<means days beetwen - 2 (first and last day)
-    // could test validity of dates here but I'm already doing
-    // that in the main script
-    // If not numeric then convert timestamps
-    // if (!is_int($startDateAndTime)) {
-    //     $startDateAndTime = strtotime($startDateAndTime);
-    //  }
-    // if (!is_int($stopDateAndTime)) {
-    //     $stopDateAndTime = strtotime($stopDateAndTime);
-    // }
-    //  if (array_key_exists($row['worknumber'], $array)) 
-    // {			
-    //    $cc += $i;	
-    //   $bb += $i;		
-    //  $array[$row['worknumber']] += $i;				
-    //}
-    //else
-    // {
-    //    $cc += $i;	
-    //   $bb += $i;	
-    //  $array[$row['worknumber']] = $i;
-    //  $array2[$row['worknumber']] = $row['company'];
-    // }			
-
-    $aryRange = [];
-    $iDateFrom = strtotime($startDateAndTime);
-    $iDateTo = strtotime($stopDateAndTime);
-
-    if ($iDateTo >= $iDateFrom) {
-        array_push($aryRange, date('Y-m-d H:i:s', $iDateFrom)); // first entry
-        $start = explode($iDateFrom, " ");
-
-        while ($iDateFrom < $iDateTo) {
-            $iDateFrom += 86400; // add 24 hours
-            if (date('Y-m-d', $iDateFrom) == date('Y-m-d', $iDateTo)) {
-                array_push($aryRange, date('Y-m-d H:i:s', $iDateTo));
-            } elseif ($iDateFrom < $iDateTo) {
-                array_push($aryRange, date('Y-m-d', $iDateFrom));
-            }
-        }
-    }
-
-
-    $arrayWithDeductedWeekend = [];
-    if (!exceptionCheck("Saturday", $exceptions)) {
-        foreach ($aryRange as $days) {
-
-            if (!(date("l", strtotime($days)) == "Saturday") && !(date("l", strtotime($days)) == "Sunday")) {
-                array_push($arrayWithDeductedWeekend, $days);
-            }
-        }
+    $CdateArray = array();
+    if (date('Y-m-d', $iDateFrom) == date('Y-m-d', $iDateTo)) {
+        $StartDateExplode = explode(" ", $startDateAndTime);
+        $StopDateExplode = explode(" ", $stopDateAndTime);
+        $newDate1 = new Cdate(date('Y-m-d', $iDateFrom), empty($StartDateExplode[1]) ? "07:00:00" : $StartDateExplode[1], empty($StopDateExplode[1]) ? $FinishTime : $StopDateExplode[1]);
+        array_push($CdateArray, $newDate1);
     } else {
-        foreach ($aryRange as $days) {
-
-            if (!(date("l", strtotime($days)) == "Sunday")) {
-                if (date("l", strtotime($days)) == "Saturday") {
-                    array_push($arrayWithDeductedWeekend, changeExceptionDate("Saturday", $exceptions));
-                } else {
-                    array_push($arrayWithDeductedWeekend, $days);
+        if ($iDateTo >= $iDateFrom) {
+            array_push($double_array, date('Y-m-d H:i:s', $iDateFrom)); // first entry
+            $StartDateExplode = explode(" ", $startDateAndTime);
+            $StopDateExplode = explode(" ", $stopDateAndTime);
+            $newDate1 = new Cdate(date('Y-m-d', $iDateFrom), empty($StartDateExplode[1]) ? "07:00:00" : $StartDateExplode[1], $FinishTime);
+            array_push($CdateArray, $newDate1);
+            while ($iDateFrom < $iDateTo) {
+                $iDateFrom += 86400; // add 24 hours
+                if (date('Y-m-d', $iDateFrom) == date('Y-m-d', $iDateTo)) {
+                    array_push($double_array, date('Y-m-d H:i:s', $iDateTo));
+                    $newDate2 = new Cdate(date('Y-m-d', $iDateTo), "07:00:00", empty($StopDateExplode[1]) ? "" : $StopDateExplode[1]);
+                    array_push($CdateArray, $newDate2);
+                } elseif ($iDateFrom < $iDateTo) {
+                    array_push($double_array, date('Y-m-d', $iDateFrom));
+                    $newDate3 = new Cdate(date('Y-m-d', $iDateFrom), "07:00:00", $FinishTime);
+                    array_push($CdateArray, $newDate3);
                 }
             }
         }
     }
-    return deductHolidaysFromArray($arrayWithDeductedWeekend, $HollidayArray);
-
-    foreach ($arrayWithDeductedWeekend as $days) {
+    $days_array = array();
+    foreach ($CdateArray as $day) { // if exception day is holiday day ( means somebady work in holiday w have to add this day to array)
+        if (checkIfIsInCdateArray($exceptions, $day->getDate()) && in_array($day->getDate(), $HollidayArray)) {
+            array_push($days_array, getOneDayFromArrayCdate($exceptions, $day->getDate()));
+        } elseif (!in_array($day->getDate(), $HollidayArray)) {
+            array_push($days_array, $day);
+        }
     }
-}
-function changeExceptionDate($DayName, $ArrayOfExceptions)
-{
-    foreach ($ArrayOfExceptions as $dayExc) {
-        if (date("l", strtotime($dayExc)) == $DayName) {
-            return $dayExc;
+    //return $days_array;
+
+    $arrayWithDeductedWeekend = array();
+    if (!exceptionCheck("Saturday", $exceptions)) { //if there is no saturday we have to deduct saturday and sunday from array
+        foreach ($days_array as $days) {
+            if (!$days->isSaturday() || !$days->isSunday()) {
+                array_push($arrayWithDeductedWeekend, $days);
+            }
+        }
+    } else {
+        foreach ($days_array as $days) { //if we have saturday in exception (means that somebody work in saturday and put start/stop time into exceptions) we have to add start/stop time for saturday and deduct sunday
+            if ($days->isSaturday()) {
+                foreach ($exceptions as $exc) {
+                    if ($exc->getDate() == $days->getDate()) {
+                        array_push($arrayWithDeductedWeekend, $exc);
+                    }
+                }
+            } elseif (!$days->isSunday()) {
+                array_push($arrayWithDeductedWeekend, $days);
+            }
+        }
+    }
+    return $arrayWithDeductedWeekend;
+    $arraWithDeductedWeekendHolidays = array();
+    foreach ($arrayWithDeductedWeekend as $days) {
+        if (checkIfIsInCdateArray($exceptions, $days->getDate())) {
+            array_push($arraWithDeductedWeekendHolidays, getOneDayFromArrayCdate($exceptions, $days));
         }
     }
 }
+
+function checkIfIsInCdateArray($Cdaterray, $date)
+{
+    foreach ($Cdaterray as $Cdate) {
+        if ($Cdate->getDate() == $date) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+function getOneDayFromArrayCdate($array, $date)
+{
+    foreach ($array as $Cdate) {
+        if ($Cdate->getDate() == $date) {
+            return $Cdate;
+        } else {
+            return "";
+        }
+    }
+}
+
 function exceptionCheck($dayToCheck, $exceptionArray)
 {
     if (is_array($exceptionArray) || is_object($exceptionArray)) {
         foreach ($exceptionArray as $day) {
-            return date("l", strtotime($day)) == $dayToCheck ? true : false;
+            return $day->getWeekDayName() == $dayToCheck ? true : false;
         }
     }
-}
-
-
-
-function deductHolidaysFromArray($arrayOfDates, $arrayOfHolidays)
-{
-    $days_array = array();
-
-    foreach ($arrayOfDates as $day) {
-
-        $timestampofday = strtotime($day);
-        if (!in_array(date("Y-m-d", $timestampofday), $arrayOfHolidays)) {
-            $days_array[] = date("Y-m-d H:i:s", $timestampofday);
-        }
-    }
-    return $days_array;
 }
