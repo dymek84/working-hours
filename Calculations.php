@@ -1,16 +1,12 @@
 <?php
 
-namespace App\Calculations;
-
-use App\Timei;
-
 
 function isSameDay($start, $end)
 {
     if (date("D", strtotime($start)) == date("D", strtotime($end))) {
-        return true;
+        //  return true;
     } else {
-        return false;
+        //  return false;
     }
 }
 function isNextDay($start, $end)
