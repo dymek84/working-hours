@@ -100,3 +100,46 @@ function exceptionCheck($dayToCheck, $exceptionArray)
         }
     }
 }
+
+function getDurationFromCdateArray($cdateArray)
+{
+    $i = 0;
+    foreach ($cdateArray as $cdates) {
+        $i +=  $cdates->getDuration();
+    }
+    return $i;
+}
+
+function getTotalBreaksFromCdateArray($cdateArray)
+{
+    $i = 0;
+    foreach ($cdateArray as $cdates) {
+        $i +=  $cdates->getBreaks();
+    }
+    return $i;
+}
+function getUserExceptionsDatesArray($userid, $daterangestart, $daterangestop)
+{
+    $link = mysqli_connect("localhost", "root", "dymek", "web");
+    $sql = "SELECT * FROM exceptions WHERE userId=$userid AND DATE >= '$daterangestart' AND DATE <= '$daterangestop'";
+    $HollidayArray = array();
+    $res_data = mysqli_query($link, $sql);
+    $CdateArray = array();
+    while ($row = mysqli_fetch_array($res_data)) {
+        $cdate = new Cdate($row['date'], $row['start'], $row['stop']);
+        array_push($CdateArray, $cdate);
+    }
+    return $CdateArray;
+}
+
+$exceptionsa = array(new Cdate("2022-04-02", "07:30:55", "16:30:00"), new Cdate("2022-03-29", "07:35:00", "16:30:00"));
+$hollidays = array("2022-04-01");
+//print_r(newCalculation('22-04-04 16:30:00', '22-04-05 09:00:00', $exceptionsa, $hollidays, "16:30:00")) . "\r\n";
+//echo getDurationFromCdateArray(newCalculation('22-04-05 07:00:00', '22-04-05 09:00:00', $exceptionsa, $hollidays, "16:30:00"));
+//echo "\r\n";
+//echo getTotalBreaksFromCdateArray(newCalculation('22-04-04 16:30:00', '22-04-04 16:30:00', $exceptionsa, $hollidays, "16:30:00"));
+//echo "\r\n";
+//echo getTotalBreaksFromCdateArray(newCalculation('22-04-05 07:00:00', '22-04-05 09:00:00', $exceptionsa, $hollidays, "16:30:00"));
+//echo "\r\n";
+//echo getDurationFromCdateArray(newCalculation('22-04-04 07:00:00', '22-04-04 16:30:00', $exceptionsa, $hollidays, "16:30:00"));
+//echo "\r\n";

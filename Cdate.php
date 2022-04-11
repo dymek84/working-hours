@@ -62,8 +62,8 @@ class Cdate
         return $this->getDuration() - $this->getBreaks();
     }
 }
-$test = new Cdate("2022-04-02", "07:00:00", "16:30:00");
-echo $test->getDurationWithoutBreaks();
+$test = new Cdate("2022-04-02", "07:00:00", "09:00:00");
+//echo $test->getBreaks();
 
 function calculateBreaks($Cdate)
 {
