@@ -7,3 +7,10 @@ Stop = 20-03-12 16:30:00
 exceptions = null
 breaks = (09:30-10:00),(12:30-13:00)
 Total hours = 8,5
+
+Todo:
+
+Feedback 
+
+Notificatio on success request
+
