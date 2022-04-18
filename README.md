@@ -10,7 +10,7 @@ Total hours = 8,5
 
 Todo:
 
-Feedback 
+Feedback (complete)
 
-Notificatio on success request
+Notificatio on success request  (complete)
 
